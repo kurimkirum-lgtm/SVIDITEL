@@ -58,5 +58,7 @@ gradlew.bat build
 
 ## Документы
 
+- [Журнал изменений и известные ограничения](CHANGELOG.md)
+
 - [Дизайн Свидетеля и логика Director AI](docs/DESIGN_WITNESS.md)
 - [Инструкция по тестированию](docs/TESTING.md)
