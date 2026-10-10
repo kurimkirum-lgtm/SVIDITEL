@@ -4,6 +4,8 @@
 
 Психологический хоррор-мод для Minecraft Java Edition на Fabric. Проект находится на ранней стадии разработки.
 
+Для Minecraft 26.3 проект использует стабильный Fabric Loom 1.17.11 и Gradle 9.6.0 — версии, соответствующие рекомендациям Fabric для этой версии игры.
+
 ## Статус
 
 - [x] Базовая структура Gradle/Fabric
@@ -21,7 +23,7 @@
 
 - Minecraft Java Edition 26.3
 - Java 25
-- Gradle 9.7.1
+- Gradle 9.6.0
 
 Отдельно устанавливать Maven не нужно: зависимости скачивает Gradle.
 
@@ -42,7 +44,7 @@ gradle build
 Если хочешь создать Gradle Wrapper, выполни:
 
 ```bat
-gradle wrapper --gradle-version 9.7.1
+gradle wrapper --gradle-version 9.6.0
 gradlew.bat build
 ```
 
