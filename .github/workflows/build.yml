@@ -24,3 +24,10 @@ jobs:
           gradle-version: '9.7.1'
       - name: Build mod
         run: gradle build --no-daemon
+      - name: Upload mod JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: svidetel-mod
+          path: build/libs/*.jar
+          if-no-files-found: error
+          retention-days: 14
