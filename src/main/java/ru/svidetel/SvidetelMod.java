@@ -57,6 +57,11 @@ public final class SvidetelMod implements ModInitializer {
 
                 if (ticks % 20L == 0L) {
                     state.attention = Math.max(0, state.attention - 1);
+
+                    // Быстрые шаги привлекают внимание, обычное движение — нет.
+                    if (player.isSprinting()) {
+                        state.attention = Math.min(100, state.attention + 2);
+                    }
                 }
 
                 if (ticks % 1200L == 0L && state.sanity < 45
