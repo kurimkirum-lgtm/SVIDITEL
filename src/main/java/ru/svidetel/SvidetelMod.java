@@ -2,6 +2,7 @@ package ru.svidetel;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
@@ -42,13 +43,16 @@ public final class SvidetelMod implements ModInitializer {
                 boolean night = dayTime >= 13000L && dayTime <= 23000L;
                 boolean underground = !level.canSeeSky(player.blockPosition());
 
-                if (night || underground) {
-                    state.sanity = Math.max(0, state.sanity - 1);
-                } else if (level.getBrightness(
-                    net.minecraft.world.level.LightLayer.SKY,
-                    player.blockPosition()
-                ) > 8) {
-                    state.sanity = Math.min(100, state.sanity + 1);
+                // Рассудок меняется раз в 5 секунд, а не каждый игровой тик.
+                if (ticks % 100L == 0L) {
+                    if (night || underground) {
+                        state.sanity = Math.max(0, state.sanity - 1);
+                    } else if (level.getBrightness(
+                        net.minecraft.world.level.LightLayer.SKY,
+                        player.blockPosition()
+                    ) > 8) {
+                        state.sanity = Math.min(100, state.sanity + 1);
+                    }
                 }
 
                 if (ticks % 20L == 0L) {
@@ -72,6 +76,11 @@ public final class SvidetelMod implements ModInitializer {
                 }
             }
         });
+
+        // Не оставляем состояние игрока в памяти после выхода с сервера.
+        ServerPlayConnectionEvents.DISCONNECT.register(
+            (handler, server) -> STATES.remove(handler.player.getUUID())
+        );
     }
 
     /** Поднимает скрытый уровень внимания, например после шума или боя. */
