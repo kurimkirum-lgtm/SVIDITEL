@@ -56,12 +56,12 @@ public final class SvidetelMod implements ModInitializer {
                 }
 
                 if (ticks % 100L == 0L) {
-                    state.attention = Math.max(0, state.attention - 1);
+                    state.attention = Math.max(0, state.attention - 2);
                 }
 
-                if (ticks % 20L == 0L && player.isSprinting()) {
-                    // Спринт шумит: внимание накапливается быстрее, чем затухает.
-                    state.attention = Math.min(100, state.attention + 2);
+                if (ticks % 40L == 0L && player.isSprinting()) {
+                    // Спринт привлекает внимание, но уровень не должен мгновенно достигать максимума.
+                    state.attention = Math.min(100, state.attention + 1);
                 }
 
                 if (ticks % 1200L == 0L && state.sanity < 45
