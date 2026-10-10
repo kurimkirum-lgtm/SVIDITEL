@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "svidetel",
+  "version": "${version}",
+  "name": "СВИДЕТЕЛЬ",
+  "description": "Психологический хоррор о скрытом преследовании, рассудке и страхе тишины.",
+  "authors": ["SVIDETEL Team"],
+  "license": "All-Rights-Reserved",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["ru.svidetel.SvidetelMod"]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~26.3",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}
