@@ -28,6 +28,7 @@ const float DARKNESS = 0.88;
 const float FOG_START = 15.0;
 const float FOG_END = 28.0;
 const float FOG_MIN_VISIBILITY = 0.035;
+const float FOG_MAX_OPACITY = 0.965;
 const float LIGHT_HIGHLIGHT_COMPRESSION = 0.62;
 const float VIGNETTE_STRENGTH = 0.76;
 const float GRAIN_STRENGTH = 0.075;
@@ -98,7 +99,7 @@ void main() {
 
     float distanceToPixel = viewDistance(uv);
     float fogAmount = smoothstep(FOG_START, FOG_END, distanceToPixel);
-    fogAmount = mix(FOG_MIN_VISIBILITY, 1.0, fogAmount);
+    fogAmount = mix(FOG_MIN_VISIBILITY, FOG_MAX_OPACITY, fogAmount);
     vec3 fogColor = vec3(0.006, 0.009, 0.014);
     color = mix(color, fogColor, fogAmount);
 
