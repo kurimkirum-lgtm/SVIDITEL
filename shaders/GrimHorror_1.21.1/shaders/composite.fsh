@@ -7,6 +7,8 @@
 */
 
 uniform sampler2D colortex0;
+uniform sampler2D depthtex0;
+uniform mat4 gbufferProjectionInverse;
 uniform float viewWidth;
 uniform float viewHeight;
 uniform float frameTimeCounter;
@@ -22,7 +24,11 @@ in vec2 texcoord;
 layout(location = 0) out vec4 fragColor;
 
 const float HORROR_INTENSITY = 1.00;
-const float DARKNESS = 0.22;
+const float DARKNESS = 0.88;
+const float FOG_START = 15.0;
+const float FOG_END = 28.0;
+const float FOG_MIN_VISIBILITY = 0.035;
+const float LIGHT_HIGHLIGHT_COMPRESSION = 0.62;
 const float VIGNETTE_STRENGTH = 0.76;
 const float GRAIN_STRENGTH = 0.075;
 const float GLITCH_STRENGTH = 0.030;
@@ -50,6 +56,14 @@ float luma(vec3 c) {
     return dot(c, vec3(0.2126, 0.7152, 0.0722));
 }
 
+float viewDistance(vec2 uv) {
+    float depth = texture(depthtex0, uv).r;
+    vec4 viewPos = gbufferProjectionInverse * vec4(uv * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+    if (abs(viewPos.w) < 0.00001) return FOG_END + 1.0;
+    viewPos.xyz /= viewPos.w;
+    return length(viewPos.xyz);
+}
+
 void main() {
     vec2 uv = texcoord;
     vec2 resolution = max(vec2(viewWidth, viewHeight), vec2(1.0));
@@ -73,10 +87,20 @@ void main() {
     color = mix(color, vec3(lum * 0.76, lum * 0.83, lum * 0.91), 0.48 * HORROR_INTENSITY);
     color *= vec3(0.82, 0.88, 1.00);
 
-    float nightFactor = smoothstep(12500.0, 15000.0, float(worldTime))
-                      + (1.0 - smoothstep(22500.0, 24000.0, float(worldTime)));
-    nightFactor = clamp(nightFactor, 0.0, 1.0);
+    float dayPhase = mod(float(worldTime), 24000.0);
+    float nightFactor = smoothstep(12000.0, 14000.0, dayPhase)
+                      * (1.0 - smoothstep(22500.0, 23999.0, dayPhase));
     color *= 1.0 - DARKNESS * HORROR_INTENSITY * nightFactor;
+
+    float brightness = max(max(color.r, color.g), color.b);
+    float compressedBrightness = brightness / (1.0 + brightness * LIGHT_HIGHLIGHT_COMPRESSION);
+    color *= mix(1.0, compressedBrightness / max(brightness, 0.0001), 0.42);
+
+    float distanceToPixel = viewDistance(uv);
+    float fogAmount = smoothstep(FOG_START, FOG_END, distanceToPixel);
+    fogAmount = mix(FOG_MIN_VISIBILITY, 1.0, fogAmount);
+    vec3 fogColor = vec3(0.006, 0.009, 0.014);
+    color = mix(color, fogColor, fogAmount);
 
     float dist = length((uv - 0.5) * vec2(resolution.x / resolution.y, 1.0));
     float breath = 0.035 * sin(t * 1.65) + 0.018 * sin(t * 3.7);
@@ -84,7 +108,7 @@ void main() {
     color *= 1.0 - vignette * VIGNETTE_STRENGTH * HORROR_INTENSITY;
 
     vec2 grainUV = floor(uv * resolution * 0.72) + vec2(floor(t * 24.0), floor(t * 17.0));
-    color += (hash21(grainUV) - 0.5) * GRAIN_STRENGTH * HORROR_INTENSITY;
+    color += (hash21(grainUV) - 0.5) * GRAIN_STRENGTH * HORROR_INTENSITY * (1.0 - fogAmount);
 
     float pulse = max(0.0, sin(t * 1.8 + noise2(uv * 4.0) * 2.2));
     float edgeWeight = smoothstep(0.18, 0.78, dist);
